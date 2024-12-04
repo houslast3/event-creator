@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventoSocial - Encontre os melhores eventos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-left: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .user-actions a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 16px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .event-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .event-content {
+            padding: 20px;
+        }
+
+        .event-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .event-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .event-detail {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .event-detail i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .attendees {
+            margin: 20px 0;
+        }
+
+        .attendees-list {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .attendee {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            margin-left: -10px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .attendee:first-child {
+            margin-left: 0;
+        }
+
+        .more-attendees {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: -10px;
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .categories {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .category {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category:hover, .category.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-calendar-alt"></i> EventoSocial
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Buscar eventos...">
+            </div>
+            <div class="user-actions">
+                <a href="#"><i class="fas fa-plus-circle"></i> Criar Evento</a>
+                <a href="#"><i class="fas fa-user"></i> Perfil</a>
+            </div>
+        </header>
+
+        <!-- Categories -->
+        <div class="categories">
+            <div class="category active">Todos</div>
+            <div class="category">Música Eletrônica</div>
+            <div class="category">Shows</div>
+            <div class="category">Festivais</div>
+            <div class="category">Teatro</div>
+            <div class="category">Arte</div>
+            <div class="category">Gastronomia</div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="events-grid">
+            <!-- Event Card 1 -->
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7" alt="Evento" class="event-image">
+                <div class="event-content">
+                    <h3 class="event-title">Sunset Electronic Festival</h3>
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <i class="far fa-calendar"></i>
+                            <span>25 de Dezembro, 2023 • 16:00</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Green Park Club, São Paulo</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-music"></i>
+                            <span>DJs: Alex B, Maria K, John Deep</span>
+                        </div>
+                    </div>
+                    <div class="attendees">
+                        <div class="attendees-title">Confirmados</div>
+                        <div class="attendees-list">
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=1')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=2')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=3')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=4')"></div>
+                            <div class="more-attendees">+42</div>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-check"></i> Confirmar Presença
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-comments"></i> Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Card 2 -->
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30" alt="Evento" class="event-image">
+                <div class="event-content">
+                    <h3 class="event-title">Deep House Night</h3>
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <i class="far fa-calendar"></i>
+                            <span>31 de Dezembro, 2023 • 22:00</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Club Blue, Rio de Janeiro</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-music"></i>
+                            <span>Live: Deep Collective</span>
+                        </div>
+                    </div>
+                    <div class="attendees">
+                        <div class="attendees-title">Confirmados</div>
+                        <div class="attendees-list">
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=5')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=6')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=7')"></div>
+                            <div class="more-attendees">+28</div>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-check"></i> Confirmar Presença
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-comments"></i> Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Card 3 -->
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745" alt="Evento" class="event-image">
+                <div class="event-content">
+                    <h3 class="event-title">Trance Evolution</h3>
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <i class="far fa-calendar"></i>
+                            <span>15 de Janeiro, 2024 • 20:00</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Arena Music Hall, Belo Horizonte</span>
+                        </div>
+                        <div class="event-detail">
+                            <i class="fas fa-music"></i>
+                            <span>Special Guest: Trance Master</span>
+                        </div>
+                    </div>
+                    <div class="attendees">
+                        <div class="attendees-title">Confirmados</div>
+                        <div class="attendees-list">
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=8')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=9')"></div>
+                            <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img=10')"></div>
+                            <div class="more-attendees">+65</div>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-check"></i> Confirmar Presença
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-comments"></i> Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

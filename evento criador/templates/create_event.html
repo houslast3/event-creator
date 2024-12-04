@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Criar Evento - EventoSocial{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 800px;">
+    <h2 style="margin-bottom: 20px; text-align: center;">Criar Novo Evento</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="title">Título do Evento</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Descrição</label>
+            <textarea id="description" name="description" rows="5" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="date">Data e Hora</label>
+            <input type="datetime-local" id="date" name="date" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="location">Local</label>
+            <input type="text" id="location" name="location" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="image_url">URL da Imagem de Capa</label>
+            <input type="url" id="image_url" name="image_url" placeholder="https://...">
+        </div>
+        
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="is_private" name="is_private" style="width: auto;">
+                Evento Privado
+            </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fas fa-plus-circle"></i> Criar Evento
+        </button>
+    </form>
+</div>
+
+<style>
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    input[type="datetime-local"] {
+        color: #fff;
+    }
+    
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

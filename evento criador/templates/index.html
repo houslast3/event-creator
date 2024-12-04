@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}EventoSocial - Encontre os melhores eventos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+        padding: 20px 0;
+    }
+
+    .event-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform 0.3s;
+    }
+
+    .event-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .event-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .event-content {
+        padding: 20px;
+    }
+
+    .event-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .event-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .event-detail {
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .event-detail i {
+        margin-right: 10px;
+        width: 20px;
+    }
+
+    .attendees {
+        margin: 20px 0;
+    }
+
+    .attendees-list {
+        display: flex;
+        margin-top: 10px;
+    }
+
+    .attendee {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        margin-left: -10px;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .attendee:first-child {
+        margin-left: 0;
+    }
+
+    .more-attendees {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: -10px;
+        font-size: 12px;
+        color: #fff;
+    }
+
+    .categories {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        overflow-x: auto;
+        padding: 10px 0;
+    }
+
+    .category {
+        padding: 8px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .category:hover, .category.active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="categories">
+    <div class="category active">Todos</div>
+    <div class="category">Música Eletrônica</div>
+    <div class="category">Shows</div>
+    <div class="category">Festivais</div>
+    <div class="category">Teatro</div>
+    <div class="category">Arte</div>
+    <div class="category">Gastronomia</div>
+</div>
+
+<div class="events-grid">
+    {% for event in events %}
+    <div class="event-card">
+        <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7' }}" alt="{{ event.title }}" class="event-image">
+        <div class="event-content">
+            <h3 class="event-title">{{ event.title }}</h3>
+            <div class="event-details">
+                <div class="event-detail">
+                    <i class="far fa-calendar"></i>
+                    <span>{{ event.date.strftime('%d de %B, %Y • %H:%M') }}</span>
+                </div>
+                <div class="event-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>{{ event.location }}</span>
+                </div>
+            </div>
+            <div class="attendees">
+                <div class="attendees-title">Confirmados</div>
+                <div class="attendees-list">
+                    {% for attendee in event.attendees[:4] %}
+                    <div class="attendee" style="background-image: url('https://i.pravatar.cc/150?img={{ loop.index }}')"></div>
+                    {% endfor %}
+                    {% if event.attendees|length > 4 %}
+                    <div class="more-attendees">+{{ event.attendees|length - 4 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="event-actions">
+                {% if current_user.is_authenticated %}
+                    <form action="{{ url_for('attend_event', event_id=event.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Confirmar Presença
+                        </button>
+                    </form>
+                    <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i> Detalhes
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login para participar
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not events %}
+<div style="text-align: center; padding: 50px;">
+    <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px;"></i>
+    <h3>Nenhum evento encontrado</h3>
+    {% if current_user.is_authenticated %}
+    <p style="margin: 20px 0;">
+        <a href="{{ url_for('create_event') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Criar Evento
+        </a>
+    </p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.category').forEach(category => {
+    category.addEventListener('click', function() {
+        document.querySelector('.category.active').classList.remove('active');
+        this.classList.add('active');
+        // Add filter functionality here
+    });
+});
+</script>
+{% endblock %}

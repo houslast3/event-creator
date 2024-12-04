@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - EventoSocial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-header {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .event-info {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+    }
+
+    .event-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+
+    .event-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .event-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .event-meta-item i {
+        width: 24px;
+    }
+
+    .event-description {
+        margin: 20px 0;
+        line-height: 1.6;
+    }
+
+    .attendees-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 20px;
+    }
+
+    .attendee-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .attendee-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    .attendee-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .chat-section {
+        margin-top: 30px;
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 30px;
+    }
+
+    .chat-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 500px;
+    }
+
+    .chat-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .message {
+        max-width: 80%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .message.sent {
+        align-self: flex-end;
+        background: rgba(76, 175, 80, 0.2);
+    }
+
+    .message-header {
+        font-size: 12px;
+        margin-bottom: 5px;
+        opacity: 0.8;
+    }
+
+    .chat-input {
+        padding: 15px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        gap: 10px;
+    }
+
+    .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    .chat-input button {
+        padding: 10px 20px;
+    }
+
+    .private-chats {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 20px;
+    }
+
+    .private-chat-list {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .private-chat-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .private-chat-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .private-chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="event-header">
+    <div class="event-info">
+        <img src="{{ event.image_url or 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7' }}" 
+             alt="{{ event.title }}" class="event-image">
+        
+        <h1>{{ event.title }}</h1>
+        
+        <div class="event-meta">
+            <div class="event-meta-item">
+                <i class="far fa-calendar"></i>
+                <span>{{ event.date.strftime('%d de %B, %Y • %H:%M') }}</span>
+            </div>
+            <div class="event-meta-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ event.location }}</span>
+            </div>
+            <div class="event-meta-item">
+                <i class="fas fa-user"></i>
+                <span>Organizado por {{ event.creator.username }}</span>
+            </div>
+        </div>
+
+        {% if current_user.is_authenticated and event.creator_id != current_user.id %}
+            <form action="{{ url_for('attend_event', event_id=event.id) }}" method="POST">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Confirmar Presença
+                </button>
+            </form>
+        {% endif %}
+
+        <div class="event-description">
+            {{ event.description }}
+        </div>
+    </div>
+
+    <div class="attendees-section">
+        <h3>Confirmados ({{ event.attendees|length }})</h3>
+        <div class="attendee-list">
+            {% for attendee in event.attendees %}
+            <div class="attendee-card">
+                <img src="https://i.pravatar.cc/150?img={{ loop.index }}" 
+                     alt="{{ attendee.user.username }}" class="attendee-avatar">
+                <div class="attendee-info">
+                    <div>{{ attendee.user.username }}</div>
+                    {% if current_user.is_authenticated and attendee.user_id != current_user.id %}
+                    <button class="btn btn-secondary btn-sm start-chat" 
+                            data-user-id="{{ attendee.user_id }}"
+                            style="padding: 5px 10px; font-size: 12px;">
+                        <i class="fas fa-comments"></i> Chat
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="chat-section">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>Chat do Evento</h3>
+        </div>
+        <div class="chat-messages" id="eventChat">
+            {% for message in event.messages if not message.is_private %}
+            <div class="message {% if message.user_id == current_user.id %}sent{% endif %}">
+                <div class="message-header">
+                    <strong>{{ message.user.username }}</strong> • {{ message.timestamp.strftime('%H:%M') }}
+                </div>
+                {{ message.content }}
+            </div>
+            {% endfor %}
+        </div>
+        {% if current_user.is_authenticated %}
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Digite sua mensagem...">
+            <button class="btn btn-primary" id="sendMessage">
+                <i class="fas fa-paper-plane"></i> Enviar
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="private-chats">
+        <h3>Chats Privados</h3>
+        <div class="private-chat-list" id="privateChats">
+            <!-- Private chat list will be populated by JavaScript -->
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if current_user.is_authenticated %}
+<script>
+    const socket = io();
+    const eventId = {{ event.id }};
+    const currentUserId = {{ current_user.id }};
+    let activePrivateChat = null;
+
+    // Join event room
+    socket.emit('join', { room: `event_${eventId}` });
+
+    // Handle sending messages
+    document.getElementById('sendMessage').addEventListener('click', () => {
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        
+        if (message) {
+            socket.emit('message', {
+                message: message,
+                event_id: eventId,
+                room: `event_${eventId}`,
+                is_private: false
+            });
+            input.value = '';
+        }
+    });
+
+    // Handle receiving messages
+    socket.on('message', data => {
+        const chatMessages = document.getElementById('eventChat');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${data.user_id === currentUserId ? 'sent' : ''}`;
+        messageDiv.innerHTML = `
+            <div class="message-header">
+                <strong>${data.username}</strong> • ${data.timestamp}
+            </div>
+            ${data.message}
+        `;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+
+    // Handle private chats
+    document.querySelectorAll('.start-chat').forEach(button => {
+        button.addEventListener('click', () => {
+            const userId = button.dataset.userId;
+            const username = button.parentElement.querySelector('div').textContent;
+            startPrivateChat(userId, username);
+        });
+    });
+
+    function startPrivateChat(userId, username) {
+        activePrivateChat = userId;
+        const chatMessages = document.getElementById('eventChat');
+        chatMessages.innerHTML = ''; // Clear current chat
+        
+        // Join private chat room
+        socket.emit('join', { room: `private_${Math.min(currentUserId, userId)}_${Math.max(currentUserId, userId)}` });
+        
+        // Update chat header
+        document.querySelector('.chat-header h3').textContent = `Chat com ${username}`;
+        
+        // Update send message handler
+        document.getElementById('sendMessage').onclick = () => {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                socket.emit('message', {
+                    message: message,
+                    event_id: eventId,
+                    room: `private_${Math.min(currentUserId, userId)}_${Math.max(currentUserId, userId)}`,
+                    is_private: true,
+                    recipient_id: userId
+                });
+                input.value = '';
+            }
+        };
+    }
+</script>
+{% endif %}
+{% endblock %}
